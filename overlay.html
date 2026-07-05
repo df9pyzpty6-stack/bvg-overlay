@@ -220,48 +220,66 @@
   // Playlist IDs on tracker.gg: 13=Standard(3v3), 11=Doubles(2v2), 27=Hoops
   const RL_PLAYLISTS = { standard: 13, twos: 11, hoops: 27 };
 
-  async function fetchRLRanks() {
-    const apiUrl = `https://api.tracker.gg/api/v2/rocket-league/standard/profile/epic/${encodeURIComponent(RL_USERNAME)}`;
-    // Try direct first, then CORS proxy fallback
-    const urls = [
-      apiUrl,
-      `https://corsproxy.io/?url=${encodeURIComponent(apiUrl)}`,
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`
-    ];
+  // ── Cloudflare Worker Rank Proxy ─────────────────────────────────────
+  // IMPORTANT: Replace WORKER_URL below with your Cloudflare Worker URL
+  // after you deploy it (e.g. https://bvg-rl-proxy.c5m4ms2vcs.workers.dev/ranks)
+  const WORKER_URL = 'https://bvg-rl-proxy.c5m4ms2vcs.workers.dev/ranks';
 
-    for (const url of urls) {
-      try {
-        const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        if (!resp.ok) continue;
-        const data = await resp.json();
-        const segments = data?.data?.segments || [];
-        let found = 0;
-        segments.forEach(seg => {
-          if (seg.type !== 'playlist') return;
-          const pid   = seg.attributes?.playlistId;
-          const tier  = seg.stats?.tier?.metadata?.name || '';
-          const div   = seg.stats?.division?.metadata?.name || '';
-          const label = tier + (div ? ' ' + div : '');
-          if (pid === RL_PLAYLISTS.standard) { setRank('rank-standard', label); found++; }
-          if (pid === RL_PLAYLISTS.twos)     { setRank('rank-twos', label);     found++; }
-          if (pid === RL_PLAYLISTS.hoops)    { setRank('rank-hoops', label);    found++; }
-        });
-        if (found > 0) return; // success — stop trying
-      } catch(e) {
-        console.warn('RL fetch attempt failed:', url, e);
-      }
-    }
-    // All attempts failed — show last known
-    console.warn('All RL Tracker fetch attempts failed, showing cached ranks');
-  }
+  const RANK_KEYS = { standard: 'bvg_rank_standard', twos: 'bvg_rank_twos', hoops: 'bvg_rank_hoops' };
 
   function setRank(id, text) {
     const el = document.getElementById(id);
     if (el) { el.textContent = text; el.classList.remove('loading'); }
   }
 
-  // Fetch ranks on load and refresh every 5 minutes
-  window.addEventListener('load', () => { fetchRLRanks(); setInterval(fetchRLRanks, 300000); });
+  function loadCachedRanks() {
+    setRank('rank-standard', localStorage.getItem(RANK_KEYS.standard) || 'Loading...');
+    setRank('rank-twos',     localStorage.getItem(RANK_KEYS.twos)     || 'Loading...');
+    setRank('rank-hoops',    localStorage.getItem(RANK_KEYS.hoops)    || 'Loading...');
+  }
+
+  async function fetchRLRanks() {
+    try {
+      const resp = await fetch(WORKER_URL);
+      if (!resp.ok) throw new Error('Worker returned ' + resp.status);
+      const data = await resp.json();
+      const ranks = data.ranks;
+      if (!ranks) throw new Error('No ranks in response');
+
+      // Update display + cache locally in case of future offline load
+      if (ranks.standard) { setRank('rank-standard', ranks.standard); localStorage.setItem(RANK_KEYS.standard, ranks.standard); }
+      if (ranks.twos)     { setRank('rank-twos',     ranks.twos);     localStorage.setItem(RANK_KEYS.twos,     ranks.twos); }
+      if (ranks.hoops)    { setRank('rank-hoops',    ranks.hoops);    localStorage.setItem(RANK_KEYS.hoops,    ranks.hoops); }
+
+      console.log('RL ranks updated:', ranks);
+    } catch(e) {
+      console.warn('Worker fetch failed, showing cached ranks:', e);
+      loadCachedRanks();
+    }
+  }
+
+  function saveRanks() {
+    const s = document.getElementById('edit-standard').value.trim();
+    const t = document.getElementById('edit-twos').value.trim();
+    const h = document.getElementById('edit-hoops').value.trim();
+    if (s) { localStorage.setItem(RANK_KEYS.standard, s); setRank('rank-standard', s); }
+    if (t) { localStorage.setItem(RANK_KEYS.twos, t);     setRank('rank-twos', t); }
+    if (h) { localStorage.setItem(RANK_KEYS.hoops, h);    setRank('rank-hoops', h); }
+    document.getElementById('rank-editor').style.display = 'none';
+  }
+
+  function openRankEditor() {
+    document.getElementById('edit-standard').value = localStorage.getItem(RANK_KEYS.standard) || '';
+    document.getElementById('edit-twos').value     = localStorage.getItem(RANK_KEYS.twos)     || '';
+    document.getElementById('edit-hoops').value    = localStorage.getItem(RANK_KEYS.hoops)    || '';
+    document.getElementById('rank-editor').style.display = 'flex';
+  }
+
+  window.addEventListener('load', () => {
+    loadCachedRanks();        // Show saved ranks instantly
+    fetchRLRanks();           // Then fetch live from Worker
+    setInterval(fetchRLRanks, 300000); // Refresh every 5 minutes
+  });
 
 
   // ── Live Twitch Chat via IRC WebSocket ───────────────────────────────
@@ -372,8 +390,26 @@
 
 
 
+  <!-- Rank editor popup -->
+  <div id="rank-editor" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,0.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+    <div style="font-family:'Permanent Marker',cursive;font-size:28px;color:#4AC429;text-shadow:2px 2px 0 #000;">Update RL Ranks</div>
+    <div style="display:flex;flex-direction:column;gap:10px;width:340px;">
+      <label style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);">Standard (3v3)</label>
+      <input id="edit-standard" type="text" placeholder="e.g. Diamond III D1" style="font-size:15px;padding:10px 14px;background:#111;border:2px solid #4AC429;color:#fff;outline:none;font-family:Arial,sans-serif;">
+      <label style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);">2v2 (Doubles)</label>
+      <input id="edit-twos" type="text" placeholder="e.g. Diamond II D2" style="font-size:15px;padding:10px 14px;background:#111;border:2px solid #4AC429;color:#fff;outline:none;font-family:Arial,sans-serif;">
+      <label style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);">Hoops</label>
+      <input id="edit-hoops" type="text" placeholder="e.g. Platinum III D2" style="font-size:15px;padding:10px 14px;background:#111;border:2px solid #4AC429;color:#fff;outline:none;font-family:Arial,sans-serif;">
+    </div>
+    <div style="display:flex;gap:12px;">
+      <button onclick="saveRanks()" style="font-family:'Permanent Marker',cursive;font-size:18px;background:#4AC429;color:#000;border:none;padding:12px 32px;cursor:pointer;">Save Ranks</button>
+      <button onclick="document.getElementById('rank-editor').style.display='none'" style="font-family:'Permanent Marker',cursive;font-size:18px;background:#333;color:#fff;border:none;padding:12px 32px;cursor:pointer;">Cancel</button>
+    </div>
+    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.3);">Ranks are saved in OBS — only update when your rank changes</div>
+  </div>
+
   <!-- Rank pills -->
-  <div class="ranks">
+  <div class="ranks" ondblclick="openRankEditor()" title="Double-click to update ranks">
     <div class="rpill standard"><span class="label">Standard</span><span class="rank-val loading" id="rank-standard">Loading...</span></div>
     <div class="rpill twos"><span class="label">2v2</span><span class="rank-val loading" id="rank-twos">Loading...</span></div>
     <div class="rpill hoops"><span class="label">Hoops</span><span class="rank-val loading" id="rank-hoops">Loading...</span></div>

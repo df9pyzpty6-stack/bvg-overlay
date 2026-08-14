@@ -106,38 +106,7 @@
   .chat-row:nth-child(5) .u{color:#E85566;}
 
 
-  /* RANK PILLS upper-left */
-  .rank-pills{
-    position:absolute;top:84px;left:20px;width:330px;z-index:6;
-    display:flex;flex-direction:column;gap:10px;
-  }
-  .rank-pill{
-    position:relative;height:42px;border-radius:999px;
-    background:linear-gradient(90deg, rgba(14,14,14,0.95), rgba(28,28,28,0.82));
-    border:1px solid rgba(255,255,255,0.1);
-    box-shadow:0 6px 18px rgba(0,0,0,0.35);
-    overflow:hidden;display:flex;align-items:center;justify-content:space-between;
-    padding:0 16px 0 18px;
-  }
-  .rank-pill::before{
-    content:'';position:absolute;left:0;top:0;bottom:0;width:6px;
-  }
-  .rank-pill.standard{background:linear-gradient(90deg, rgba(0,76,96,0.58), rgba(15,15,15,0.96)); box-shadow:0 6px 18px rgba(0,209,255,0.18);}
-  .rank-pill.standard::before{background:#00D1FF;}
-  .rank-pill.doubles{background:linear-gradient(90deg, rgba(42,110,25,0.55), rgba(15,15,15,0.96)); box-shadow:0 6px 18px rgba(114,229,80,0.18);}
-  .rank-pill.doubles::before{background:#72E550;}
-  .rank-pill.hoops{background:linear-gradient(90deg, rgba(130,67,0,0.52), rgba(15,15,15,0.96)); box-shadow:0 6px 18px rgba(255,159,28,0.18);}
-  .rank-pill.hoops::before{background:#FF9F1C;}
-  .rank-pill .label{
-    font-family:'Permanent Marker',cursive;font-size:15px;color:#fff;
-    text-shadow:1px 1px 0 #000;letter-spacing:1px;
-  }
-  .rank-pill .value{
-    font-family:'Permanent Marker',cursive;font-size:16px;color:#fff;
-    text-shadow:1px 1px 0 #000;letter-spacing:1px;text-align:right;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;
-  }
-  .rank-pill .value.loading{color:rgba(255,255,255,0.6);}
+
 
   .bot-bar .recent:nth-child(2){
     background:linear-gradient(90deg, rgba(74,196,41,0.13), rgba(145,70,255,0.08));
@@ -163,15 +132,8 @@
   const CHANNEL   = 'BeardedVeteranGaming';
 
 
-  // --- Rocket League rank / match data config ---
-  // The official Rocket League Stats API is a local live-match telemetry API.
-  // It does NOT currently expose ranked tier/division/MMR fields, so rank text still
-  // comes from the local JSON feeds below. The WebSocket is used for match awareness
-  // and to trigger a rank refresh after a match ends.
+  // --- Rocket League live match data config ---
   const RL_STATS_WS_URL = 'ws://127.0.0.1:49124';
-  const OMNISTATS_RANKS_URL = 'omnistats_ranks.json';
-  const RANKS_FEED_SOURCES = [OMNISTATS_RANKS_URL, 'ranks.json'];
-  const RANK_REFRESH_MS = 5 * 60 * 1000;
   const RL_STATS_RECONNECT_MS = 5000;
 
   let rlStatsSocket = null;
@@ -361,12 +323,6 @@
             document.documentElement.dataset.rlPlaylistId = currentPlaylistId ?? '';
           }
 
-          // Rank/MMR is not part of the official Stats API payload. After a match,
-          // refresh whichever local rank feed is available so the pills update quickly
-          // if OmniStats/a helper has written new values.
-          if (eventName === 'MatchEnded' || eventName === 'PodiumStart' || eventName === 'MatchDestroyed') {
-            setTimeout(updateRanks, 15000);
-          }
         } catch (parseErr) {
           console.warn('Rocket League Stats API message parse failed:', parseErr);
         }
@@ -517,48 +473,9 @@
     });
   }
 
-  function setRankValue(id, value, isLoading = false) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = value;
-    el.classList.toggle('loading', isLoading);
-  }
-
-  async function fetchRankSource(sourceUrl) {
-    const bust = `${sourceUrl}${sourceUrl.includes('?') ? '&' : '?'}_=${Date.now()}`;
-    const resp = await fetch(bust, { cache: 'no-store' });
-    if (!resp.ok) throw new Error(`Rank feed HTTP ${resp.status} for ${sourceUrl}`);
-    return resp.json();
-  }
-
-  async function updateRanks() {
-    try {
-      let data = null;
-      for (const sourceUrl of RANKS_FEED_SOURCES) {
-        try {
-          data = await fetchRankSource(sourceUrl);
-          if (data) break;
-        } catch (sourceErr) {
-          console.warn('Rank source failed:', sourceUrl, sourceErr);
-        }
-      }
-      if (!data) throw new Error('No rank source available');
-      setRankValue('rank-standard', data.standard || 'Unranked');
-      setRankValue('rank-doubles', data.doubles || 'Unranked');
-      setRankValue('rank-hoops', data.hoops || 'Unranked');
-    } catch (e) {
-      console.warn('Rank pill update failed:', e);
-      setRankValue('rank-standard', 'Set rank feed', true);
-      setRankValue('rank-doubles', 'Set rank feed', true);
-      setRankValue('rank-hoops', 'Set rank feed', true);
-    }
-  }
-
   window.addEventListener('load', () => {
     init();
-    updateRanks();
     connectRocketLeagueStats();
-    setInterval(updateRanks, RANK_REFRESH_MS);
   });
 </script>
 </head><body>
@@ -585,22 +502,6 @@
     <div class="stat"><b id="follower-count">--</b>&nbsp;Followers</div>
     <div class="stat">🎮&nbsp;<b id="game-name">Loading...</b></div>
     <div class="bar-right">Channel Points: <span>45,230</span></div>
-  </div>
-
-  <!-- Rank pills -->
-  <div class="rank-pills">
-    <div class="rank-pill standard">
-      <div class="label">Standard</div>
-      <div class="value loading" id="rank-standard">Loading...</div>
-    </div>
-    <div class="rank-pill doubles">
-      <div class="label">Doubles</div>
-      <div class="value loading" id="rank-doubles">Loading...</div>
-    </div>
-    <div class="rank-pill hoops">
-      <div class="label">Hoops</div>
-      <div class="value loading" id="rank-hoops">Loading...</div>
-    </div>
   </div>
 
   <!-- Cam frame -->

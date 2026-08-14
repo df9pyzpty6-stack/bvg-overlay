@@ -9,10 +9,10 @@
   /* TOP BAR */
   .top-bar{
     position:absolute;top:0;left:0;right:0;height:64px;
-    background:rgba(10,10,10,0.93);
+    background:linear-gradient(90deg, rgba(8,12,10,0.97), rgba(15,10,24,0.96));
     border-bottom:3px solid #4AC429;
     display:flex;align-items:center;padding:0 20px;gap:18px;z-index:10;
-    box-shadow:0 3px 25px rgba(74,196,41,0.3);
+    box-shadow:0 3px 25px rgba(74,196,41,0.35), inset 0 -1px 0 rgba(145,70,255,0.22);
   }
   .logo-block{display:flex;align-items:center;gap:10px;
     padding-right:18px;border-right:1px solid rgba(255,255,255,0.1);}
@@ -41,27 +41,30 @@
   /* BOTTOM BAR */
   .bot-bar{
     position:absolute;bottom:0;left:0;right:0;height:72px;
-    background:rgba(10,10,10,0.93);
-    border-top:2px solid rgba(74,196,41,0.35);
+    background:linear-gradient(90deg, rgba(12,12,12,0.96), rgba(18,12,28,0.95));
+    border-top:2px solid rgba(74,196,41,0.45);
     display:flex;align-items:center;padding:0 20px;gap:16px;z-index:10;
+    box-shadow:0 -2px 20px rgba(145,70,255,0.12);
   }
   .recent{display:flex;align-items:center;gap:10px;
-    padding-right:18px;border-right:1px solid rgba(255,255,255,0.07);}
+    padding:7px 14px 7px 10px;border-right:1px solid rgba(255,255,255,0.07);
+    background:linear-gradient(90deg, rgba(145,70,255,0.12), rgba(74,196,41,0.06));
+    border-radius:999px;box-shadow:inset 0 0 0 1px rgba(145,70,255,0.12);}
   .rev-icon{width:38px;height:38px;border-radius:50%;
-    background:rgba(145,70,255,0.18);border:1px solid rgba(145,70,255,0.4);
-    display:flex;align-items:center;justify-content:center;font-size:18px;}
+    background:radial-gradient(circle at 35% 35%, rgba(255,255,255,0.22), rgba(145,70,255,0.55));border:1px solid rgba(145,70,255,0.7);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 14px rgba(145,70,255,0.35);}
   .rev-text .rl{font-size:10px;color:rgba(255,255,255,0.35);
     text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;}
   .rev-text .rn{font-family:'Permanent Marker',cursive;font-size:15px;color:#9146FF;
     text-shadow:1px 1px 0 #000;}
 
   .ticker{flex:1;font-family:Arial,sans-serif;font-size:13px;
-    color:rgba(255,255,255,0.45);letter-spacing:1px;}
-  .ticker b{color:#4AC429;}
+    color:rgba(255,255,255,0.62);letter-spacing:1px;}
+  .ticker b{color:#4AC429;text-shadow:0 0 8px rgba(74,196,41,0.28);}
 
   .socials-row{margin-left:auto;display:flex;gap:20px;}
   .sh{font-family:'Permanent Marker',cursive;font-size:13px;
-    color:rgba(255,255,255,0.4);}
+    color:rgba(255,255,255,0.58);}
   .sh span{color:#4AC429;}
 
   /* AVATAR bottom-left cam frame */
@@ -70,9 +73,9 @@
     width:380px;height:270px;z-index:5;
   }
   .cam-inner{width:100%;height:100%;
-    border:2px solid rgba(74,196,41,0.45);
-    background:rgba(10,10,10,0.88);
-    position:relative;
+    border:2px solid rgba(74,196,41,0.6);
+    background:linear-gradient(180deg, rgba(8,14,9,0.9), rgba(12,10,20,0.9));
+    position:relative;box-shadow:0 0 18px rgba(74,196,41,0.18), inset 0 0 20px rgba(145,70,255,0.08);
   }
   .cam-corner{position:absolute;width:18px;height:18px;}
   .cam-corner.tl{top:-2px;left:-2px;border-top:3px solid #4AC429;border-left:3px solid #4AC429;}
@@ -88,11 +91,11 @@
 
   /* Chat panel right */
   .chat-box{position:absolute;top:76px;right:20px;width:320px;z-index:5;}
-  .chat-hdr{background:rgba(10,10,10,0.93);
-    border:1px solid rgba(74,196,41,0.3);border-bottom:2px solid #4AC429;
+  .chat-hdr{background:linear-gradient(90deg, rgba(10,10,10,0.95), rgba(20,14,30,0.92));
+    border:1px solid rgba(74,196,41,0.35);border-bottom:2px solid #4AC429;
     padding:8px 14px;font-family:'Permanent Marker',cursive;font-size:13px;
-    color:#4AC429;letter-spacing:2px;text-shadow:1px 1px 0 #000;}
-  .chat-row{background:rgba(10,10,10,0.85);border:1px solid rgba(255,255,255,0.05);
+    color:#4AC429;letter-spacing:2px;text-shadow:1px 1px 0 #000;box-shadow:0 0 14px rgba(74,196,41,0.15);}
+  .chat-row{background:linear-gradient(90deg, rgba(10,10,10,0.88), rgba(18,12,24,0.84));border:1px solid rgba(255,255,255,0.05);
     border-top:none;padding:8px 14px;font-size:12px;font-family:Arial,sans-serif;
     display:flex;gap:6px;}
   .chat-row .u{font-weight:700;flex-shrink:0;}
@@ -110,8 +113,8 @@
   }
   .rank-pill{
     position:relative;height:42px;border-radius:999px;
-    background:linear-gradient(90deg, rgba(12,12,12,0.94), rgba(22,22,22,0.78));
-    border:1px solid rgba(255,255,255,0.08);
+    background:linear-gradient(90deg, rgba(14,14,14,0.95), rgba(28,28,28,0.82));
+    border:1px solid rgba(255,255,255,0.1);
     box-shadow:0 6px 18px rgba(0,0,0,0.35);
     overflow:hidden;display:flex;align-items:center;justify-content:space-between;
     padding:0 16px 0 18px;
@@ -119,19 +122,40 @@
   .rank-pill::before{
     content:'';position:absolute;left:0;top:0;bottom:0;width:6px;
   }
+  .rank-pill.standard{background:linear-gradient(90deg, rgba(0,76,96,0.58), rgba(15,15,15,0.96)); box-shadow:0 6px 18px rgba(0,209,255,0.18);}
   .rank-pill.standard::before{background:#00D1FF;}
+  .rank-pill.doubles{background:linear-gradient(90deg, rgba(42,110,25,0.55), rgba(15,15,15,0.96)); box-shadow:0 6px 18px rgba(114,229,80,0.18);}
   .rank-pill.doubles::before{background:#72E550;}
+  .rank-pill.hoops{background:linear-gradient(90deg, rgba(130,67,0,0.52), rgba(15,15,15,0.96)); box-shadow:0 6px 18px rgba(255,159,28,0.18);}
   .rank-pill.hoops::before{background:#FF9F1C;}
   .rank-pill .label{
     font-family:'Permanent Marker',cursive;font-size:15px;color:#fff;
     text-shadow:1px 1px 0 #000;letter-spacing:1px;
   }
   .rank-pill .value{
-    font-family:'Permanent Marker',cursive;font-size:16px;color:rgba(255,255,255,0.92);
+    font-family:'Permanent Marker',cursive;font-size:16px;color:#fff;
     text-shadow:1px 1px 0 #000;letter-spacing:1px;text-align:right;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;
   }
   .rank-pill .value.loading{color:rgba(255,255,255,0.6);}
+
+  .bot-bar .recent:nth-child(2){
+    background:linear-gradient(90deg, rgba(74,196,41,0.13), rgba(145,70,255,0.08));
+    box-shadow:inset 0 0 0 1px rgba(74,196,41,0.14);
+  }
+  .bot-bar .recent:nth-child(2) .rev-icon{
+    background:radial-gradient(circle at 35% 35%, rgba(255,255,255,0.22), rgba(74,196,41,0.58));
+    border-color:rgba(74,196,41,0.72);
+    box-shadow:0 0 14px rgba(74,196,41,0.32);
+  }
+
+  .chat-status{background:linear-gradient(90deg, rgba(10,10,10,0.88), rgba(18,12,24,0.84));
+    border:1px solid rgba(255,255,255,0.05);border-top:none;padding:8px 14px;
+    font-size:11px;font-family:Arial,sans-serif;color:rgba(255,255,255,0.42);letter-spacing:.5px;}
+  #live-chat-rows{display:flex;flex-direction:column;}
+  #live-chat-rows .chat-row{min-height:31px;align-items:flex-start;}
+  #live-chat-rows .chat-row .u{max-width:115px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #live-chat-rows .chat-row .m{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.25;}
 
 </style>
 <script>
@@ -177,7 +201,7 @@
 
   function redirectToAuth() {
     const redirectUri = encodeURIComponent(window.location.href.split('#')[0]);
-    const scope = encodeURIComponent('moderator:read:followers channel:read:subscriptions');
+    const scope = encodeURIComponent('moderator:read:followers channel:read:subscriptions chat:read');
     window.location.href =
       `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}` +
       `&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
@@ -185,6 +209,10 @@
 
   let accessToken = null;
   let userId = null;
+  let authLogin = null;
+  let chatSocket = null;
+  let chatReconnectTimer = null;
+  const CHAT_MAX_ROWS = 5;
 
   async function init() {
     // Check if Twitch just redirected back with a token
@@ -209,7 +237,19 @@
     const uData = await uResp.json();
     if (uData.data && uData.data.length > 0) userId = uData.data[0].id;
 
+    // Identify the OAuth account so Twitch IRC can authenticate with the matching NICK.
+    try {
+      const meResp = await fetch('https://api.twitch.tv/helix/users', {
+        headers: { 'Client-ID': CLIENT_ID, 'Authorization': `Bearer ${accessToken}` }
+      });
+      const meData = await meResp.json();
+      if (meData.data && meData.data.length > 0) authLogin = meData.data[0].login;
+    } catch (e) {
+      console.warn('Could not resolve Twitch OAuth login for chat:', e);
+    }
+
     await updateStats();
+    connectLiveChat();
     setInterval(updateStats, 30000);
   }
 
@@ -346,6 +386,137 @@
     }
   }
 
+  function setChatStatus(message) {
+    const status = document.getElementById('chat-status');
+    if (status) status.textContent = message;
+  }
+
+  function parseIrcTags(raw) {
+    const tags = {};
+    if (!raw || raw[0] !== '@') return tags;
+    const firstSpace = raw.indexOf(' ');
+    const tagBlock = raw.slice(1, firstSpace);
+    for (const part of tagBlock.split(';')) {
+      const idx = part.indexOf('=');
+      if (idx === -1) tags[part] = '';
+      else tags[part.slice(0, idx)] = part.slice(idx + 1)
+        .replace(/\\s/g, ' ')
+        .replace(/\\:/g, ';')
+        .replace(/\\r/g, '\r')
+        .replace(/\\n/g, '\n')
+        .replace(/\\\\/g, '\\');
+    }
+    return tags;
+  }
+
+  function addLiveChatMessage(username, message, color) {
+    const rows = document.getElementById('live-chat-rows');
+    if (!rows) return;
+
+    const row = document.createElement('div');
+    row.className = 'chat-row';
+
+    const user = document.createElement('span');
+    user.className = 'u';
+    user.textContent = `${username}:`;
+    user.style.color = color || '#4AC429';
+
+    const msg = document.createElement('span');
+    msg.className = 'm';
+    msg.textContent = message;
+
+    row.appendChild(user);
+    row.appendChild(msg);
+    rows.appendChild(row);
+
+    while (rows.children.length > CHAT_MAX_ROWS) rows.removeChild(rows.firstElementChild);
+  }
+
+  function scheduleChatReconnect() {
+    if (chatReconnectTimer) clearTimeout(chatReconnectTimer);
+    chatReconnectTimer = setTimeout(connectLiveChat, 5000);
+  }
+
+  function connectLiveChat() {
+    if (!accessToken || !authLogin) {
+      setChatStatus('Chat waiting for Twitch authorization…');
+      return;
+    }
+
+    if (chatSocket && (chatSocket.readyState === WebSocket.OPEN || chatSocket.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
+
+    setChatStatus('Connecting to Twitch chat…');
+    try {
+      chatSocket = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+    } catch (e) {
+      console.warn('Twitch chat WebSocket failed to start:', e);
+      setChatStatus('Chat connection failed — retrying…');
+      scheduleChatReconnect();
+      return;
+    }
+
+    chatSocket.addEventListener('open', () => {
+      chatSocket.send(`PASS oauth:${accessToken}`);
+      chatSocket.send(`NICK ${authLogin.toLowerCase()}`);
+      chatSocket.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+      chatSocket.send(`JOIN #${CHANNEL.toLowerCase()}`);
+    });
+
+    chatSocket.addEventListener('message', (event) => {
+      const payload = String(event.data || '');
+      for (const line of payload.split(/\r?\n/)) {
+        if (!line) continue;
+
+        if (line.startsWith('PING ')) {
+          chatSocket.send(line.replace(/^PING/, 'PONG'));
+          continue;
+        }
+
+        if (line.includes(' NOTICE ') && /authentication failed|login authentication failed/i.test(line)) {
+          setChatStatus('Re-authorize Twitch to enable live chat');
+          continue;
+        }
+
+        if (line.includes(' ROOMSTATE #')) {
+          setChatStatus(`LIVE • #${CHANNEL}`);
+          continue;
+        }
+
+        if (line.includes(' RECONNECT')) {
+          try { chatSocket.close(); } catch (_) {}
+          continue;
+        }
+
+        if (!line.includes(' PRIVMSG #')) continue;
+
+        const tags = parseIrcTags(line);
+        const privmsgIndex = line.indexOf(' PRIVMSG #');
+        const messageMarker = line.indexOf(' :', privmsgIndex);
+        if (messageMarker === -1) continue;
+
+        const prefixStart = line[0] === '@' ? line.indexOf(' :') + 2 : 1;
+        const prefixEnd = line.indexOf('!', prefixStart);
+        const login = prefixEnd > prefixStart ? line.slice(prefixStart, prefixEnd) : 'viewer';
+        const displayName = tags['display-name'] || login;
+        const color = tags.color || '#4AC429';
+        const message = line.slice(messageMarker + 2);
+        addLiveChatMessage(displayName, message, color);
+        setChatStatus(`LIVE • #${CHANNEL}`);
+      }
+    });
+
+    chatSocket.addEventListener('close', () => {
+      setChatStatus('Chat disconnected — reconnecting…');
+      scheduleChatReconnect();
+    });
+
+    chatSocket.addEventListener('error', () => {
+      setChatStatus('Chat connection error — retrying…');
+    });
+  }
+
   function setRankValue(id, value, isLoading = false) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -394,7 +565,7 @@
 <!-- One-time auth prompt (only shows on very first load) -->
 <div id="auth-prompt" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,0.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
   <div style="font-family:'Permanent Marker',cursive;font-size:36px;color:#4AC429;text-shadow:3px 3px 0 #000;">Connect to Twitch</div>
-  <div style="font-family:Arial,sans-serif;font-size:16px;color:rgba(255,255,255,0.6);text-align:center;max-width:500px;">Authorization needed to pull live viewers, follower count, recent follower, most recent sub, and current Twitch game/category.</div>
+  <div style="font-family:Arial,sans-serif;font-size:16px;color:rgba(255,255,255,0.6);text-align:center;max-width:500px;">Authorization needed to pull live viewers, follower count, recent follower, most recent sub, current Twitch game/category, and live Twitch chat.</div>
   <button onclick="redirectToAuth()" style="font-family:'Permanent Marker',cursive;font-size:22px;background:#4AC429;color:#000;border:none;padding:14px 40px;cursor:pointer;letter-spacing:2px;">Authorize with Twitch</button>
 </div>
 
@@ -446,10 +617,8 @@
   <!-- Chat box -->
   <div class="chat-box">
     <div class="chat-hdr">★ Live Chat</div>
-    <div class="chat-row"><span class="u">BVG_Mod:</span><span class="m">Welcome everyone! o7</span></div>
-    <div class="chat-row"><span class="u">GreenBeret99:</span><span class="m">Let's get these goals! PogChamp</span></div>
-    <div class="chat-row"><span class="u">TacticalTina:</span><span class="m">o7 Veteran respect!</span></div>
-    <div class="chat-row"><span class="u">CowboysFan88:</span><span class="m">LFG!! Let's gooo</span></div>
+    <div class="chat-status" id="chat-status">Connecting to Twitch chat…</div>
+    <div id="live-chat-rows"></div>
   </div>
 
   <!-- Bottom Bar -->

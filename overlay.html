@@ -86,288 +86,316 @@
 
 
 
-  /* Rank pills top-left */
-  .ranks{position:absolute;top:76px;left:20px;z-index:5;display:flex;flex-direction:column;gap:5px;}
-  .rpill{
-    background:rgba(10,10,10,0.9);border:1px solid rgba(255,255,255,0.07);
-    border-left:3px solid #4AC429;padding:6px 14px;
-    font-family:'Permanent Marker',cursive;font-size:13px;color:rgba(255,255,255,0.6);
-    display:flex;align-items:center;gap:10px;min-width:240px;
-    text-shadow:1px 1px 0 #000;
-  }
-  .rpill .label{flex-shrink:0;color:rgba(255,255,255,0.45);font-size:11px;width:70px;}
-  .rpill .rank-val{color:#fff;font-size:13px;margin-left:auto;text-align:right;}
-  .rpill.standard{border-left-color:#00BFFF;}
-  .rpill.twos{border-left-color:#4AC429;}
-  .rpill.hoops{border-left-color:#FF8C00;}
-  .rpill .rank-val.loading{color:rgba(255,255,255,0.3);}
-
   /* Chat panel right */
-  .chat-box{position:absolute;top:76px;right:20px;width:320px;z-index:5;display:flex;flex-direction:column;}
+  .chat-box{position:absolute;top:76px;right:20px;width:320px;z-index:5;}
   .chat-hdr{background:rgba(10,10,10,0.93);
     border:1px solid rgba(74,196,41,0.3);border-bottom:2px solid #4AC429;
     padding:8px 14px;font-family:'Permanent Marker',cursive;font-size:13px;
-    color:#4AC429;letter-spacing:2px;text-shadow:1px 1px 0 #000;
-    display:flex;align-items:center;justify-content:space-between;}
-  .chat-dot{width:8px;height:8px;border-radius:50%;background:#4AC429;
-    box-shadow:0 0 8px #4AC429;animation:pulse 1.5s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-  .chat-msgs{max-height:420px;overflow:hidden;display:flex;flex-direction:column;gap:0;}
+    color:#4AC429;letter-spacing:2px;text-shadow:1px 1px 0 #000;}
   .chat-row{background:rgba(10,10,10,0.85);border:1px solid rgba(255,255,255,0.05);
-    border-top:none;padding:7px 14px;font-size:12px;font-family:Arial,sans-serif;
-    display:flex;gap:6px;flex-wrap:wrap;animation:fadeIn 0.3s ease;word-break:break-word;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
-  .chat-row .u{font-weight:700;flex-shrink:0;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .chat-row .m{color:rgba(255,255,255,0.65);flex:1;}
-  .chat-waiting{padding:12px 14px;font-size:11px;font-family:Arial,sans-serif;
-    color:rgba(255,255,255,0.3);background:rgba(10,10,10,0.85);
-    border:1px solid rgba(255,255,255,0.05);border-top:none;text-align:center;}
+    border-top:none;padding:8px 14px;font-size:12px;font-family:Arial,sans-serif;
+    display:flex;gap:6px;}
+  .chat-row .u{font-weight:700;flex-shrink:0;}
+  .chat-row .m{color:rgba(255,255,255,0.55);}
+  .chat-row:nth-child(2) .u{color:#4AC429;}
+  .chat-row:nth-child(3) .u{color:#9146FF;}
+  .chat-row:nth-child(4) .u{color:#FFB347;}
+  .chat-row:nth-child(5) .u{color:#E85566;}
+
+
+  /* RANK PILLS upper-left */
+  .rank-pills{
+    position:absolute;top:84px;left:20px;width:330px;z-index:6;
+    display:flex;flex-direction:column;gap:10px;
+  }
+  .rank-pill{
+    position:relative;height:42px;border-radius:999px;
+    background:linear-gradient(90deg, rgba(12,12,12,0.94), rgba(22,22,22,0.78));
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:0 6px 18px rgba(0,0,0,0.35);
+    overflow:hidden;display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px 0 18px;
+  }
+  .rank-pill::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:6px;
+  }
+  .rank-pill.standard::before{background:#00D1FF;}
+  .rank-pill.doubles::before{background:#72E550;}
+  .rank-pill.hoops::before{background:#FF9F1C;}
+  .rank-pill .label{
+    font-family:'Permanent Marker',cursive;font-size:15px;color:#fff;
+    text-shadow:1px 1px 0 #000;letter-spacing:1px;
+  }
+  .rank-pill .value{
+    font-family:'Permanent Marker',cursive;font-size:16px;color:rgba(255,255,255,0.92);
+    text-shadow:1px 1px 0 #000;letter-spacing:1px;text-align:right;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;
+  }
+  .rank-pill .value.loading{color:rgba(255,255,255,0.6);}
+
 </style>
 <script>
   const CLIENT_ID = 'toyuplwsbvp647uckj7ihx4wuta7ke';
   const CHANNEL   = 'BeardedVeteranGaming';
 
-  let accessToken = null;
-  let userId = null;
 
+  // --- Rocket League rank / match data config ---
+  // The official Rocket League Stats API is a local live-match telemetry API.
+  // It does NOT currently expose ranked tier/division/MMR fields, so rank text still
+  // comes from the local JSON feeds below. The WebSocket is used for match awareness
+  // and to trigger a rank refresh after a match ends.
+  const RL_STATS_WS_URL = 'ws://127.0.0.1:49124';
+  const OMNISTATS_RANKS_URL = 'omnistats_ranks.json';
+  const RANKS_FEED_SOURCES = [OMNISTATS_RANKS_URL, 'ranks.json'];
+  const RANK_REFRESH_MS = 5 * 60 * 1000;
+  const RL_STATS_RECONNECT_MS = 5000;
+
+  let rlStatsSocket = null;
+  let rlStatsReconnectTimer = null;
+  let currentPlaylistId = null;
+
+  // --- Token management ---
+  // Uses implicit grant (no client secret needed). On first load, redirects to Twitch
+  // for authorization, then stores the token in localStorage until Twitch expires/revokes it.
   function getStoredToken() {
     return localStorage.getItem('bvg_twitch_token');
   }
 
-  async function saveAndInit() {
-    const input = document.getElementById('token-input');
-    const token = input ? input.value.trim() : '';
-    if (!token) { alert('Please paste your Twitch token first.'); return; }
-    localStorage.setItem('bvg_twitch_token', token);
-    accessToken = token;
-    document.getElementById('auth-prompt').style.display = 'none';
-    startStats();
+  function handleTokenFromHash() {
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      const params = new URLSearchParams(hash.replace('#', ''));
+      const token = params.get('access_token');
+      if (token) {
+        localStorage.setItem('bvg_twitch_token', token);
+        window.location.hash = '';
+        return token;
+      }
+    }
+    return null;
   }
 
-  async function loadUserId() {
-    try {
-      const uResp = await fetch(`https://api.twitch.tv/helix/users?login=${CHANNEL}`, {
-        headers: { 'Client-ID': CLIENT_ID, 'Authorization': `Bearer ${accessToken}` }
-      });
-      if (!uResp.ok) { console.warn('Could not get user ID, status:', uResp.status); return; }
-      const uData = await uResp.json();
-      if (uData.data && uData.data.length > 0) userId = uData.data[0].id;
-    } catch(e) { console.warn('User lookup failed', e); }
+  function redirectToAuth() {
+    const redirectUri = encodeURIComponent(window.location.href.split('#')[0]);
+    const scope = encodeURIComponent('moderator:read:followers channel:read:subscriptions');
+    window.location.href =
+      `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}` +
+      `&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
   }
 
-  async function startStats() {
-    await loadUserId();
-    await updateStats();
-    await updateLatestFollower();
-    setInterval(updateStats, 30000);
-    setInterval(updateLatestFollower, 60000);
-  }
+  let accessToken = null;
+  let userId = null;
 
   async function init() {
-    accessToken = getStoredToken();
+    // Check if Twitch just redirected back with a token
+    accessToken = handleTokenFromHash() || getStoredToken();
+
     if (!accessToken) {
+      // First time: show auth prompt overlay
       document.getElementById('auth-prompt').style.display = 'flex';
       return;
     }
-    startStats();
+
+    // Validate token & get user ID
+    const uResp = await fetch(`https://api.twitch.tv/helix/users?login=${CHANNEL}`, {
+      headers: { 'Client-ID': CLIENT_ID, 'Authorization': `Bearer ${accessToken}` }
+    });
+    if (uResp.status === 401) {
+      // Token expired — clear and re-auth
+      localStorage.removeItem('bvg_twitch_token');
+      document.getElementById('auth-prompt').style.display = 'flex';
+      return;
+    }
+    const uData = await uResp.json();
+    if (uData.data && uData.data.length > 0) userId = uData.data[0].id;
+
+    await updateStats();
+    setInterval(updateStats, 30000);
   }
 
   async function updateStats() {
     if (!accessToken || !userId) return;
     try {
-      // Viewer count
-      const sResp = await fetch(`https://api.twitch.tv/helix/streams?user_login=${CHANNEL}`, {
-        headers: { 'Client-ID': CLIENT_ID, 'Authorization': `Bearer ${accessToken}` }
-      });
-      const sData = await sResp.json();
-      const streamData = (sData.data && sData.data.length > 0) ? sData.data[0] : null;
-      const viewers = streamData ? streamData.viewer_count.toLocaleString() : '0';
-      document.getElementById('viewer-count').textContent = viewers;
-      if (streamData && streamData.game_name) {
-        document.getElementById('game-name').textContent = streamData.game_name;
-      }
+      const headers = {
+        'Client-ID': CLIENT_ID,
+        'Authorization': `Bearer ${accessToken}`
+      };
 
-      // Follower count
-      const fResp = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${userId}`, {
-        headers: { 'Client-ID': CLIENT_ID, 'Authorization': `Bearer ${accessToken}` }
-      });
+      // Live stream data: viewer count + current game/category while live
+      const sResp = await fetch(`https://api.twitch.tv/helix/streams?user_login=${CHANNEL}`, { headers });
+      if (sResp.status === 401) {
+        localStorage.removeItem('bvg_twitch_token');
+        accessToken = null;
+        document.getElementById('auth-prompt').style.display = 'flex';
+        return;
+      }
+      const sData = await sResp.json();
+      const stream = (sData.data && sData.data.length > 0) ? sData.data[0] : null;
+      document.getElementById('viewer-count').textContent = stream
+        ? stream.viewer_count.toLocaleString()
+        : '0';
+
+      let gameName = stream && stream.game_name ? stream.game_name : '';
+
+      // If offline, still show the category currently selected on Twitch
+      if (!gameName) {
+        const cResp = await fetch(`https://api.twitch.tv/helix/channels?broadcaster_id=${userId}`, { headers });
+        const cData = await cResp.json();
+        if (cData.data && cData.data.length > 0 && cData.data[0].game_name) {
+          gameName = cData.data[0].game_name;
+        }
+      }
+      document.getElementById('game-name').textContent = gameName || 'No Category Set';
+
+      // Follower count + most recent follower. Twitch returns followers newest-first.
+      const fResp = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${userId}&first=1`, { headers });
+      if (fResp.status === 401) {
+        localStorage.removeItem('bvg_twitch_token');
+        accessToken = null;
+        document.getElementById('auth-prompt').style.display = 'flex';
+        return;
+      }
       const fData = await fResp.json();
+
       if (fData.total !== undefined) {
         document.getElementById('follower-count').textContent = fData.total.toLocaleString();
       }
-    } catch(e) {
-      console.warn('Stats update failed:', e);
-    }
-  }
 
-  async function updateLatestFollower() {
-    if (!accessToken || !userId) return;
-    try {
-      const resp = await fetch(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${userId}&first=1`, {
-        headers: { 'Client-ID': CLIENT_ID, 'Authorization': `Bearer ${accessToken}` }
-      });
-      const data = await resp.json();
-      if (data.data && data.data.length > 0) {
-        document.getElementById('latest-sub-name').textContent = data.data[0].user_name;
+      if (fData.data && fData.data.length > 0) {
+        document.getElementById('latest-follower').textContent = fData.data[0].user_name;
+      } else {
+        document.getElementById('latest-follower').textContent = 'No recent follower';
+      }
+
+      // Most recent sub (best-effort). Twitch exposes subscriber data, but not a documented
+      // newest-first ordering guarantee like followers, so this is treated as best effort.
+      try {
+        const subResp = await fetch(`https://api.twitch.tv/helix/subscriptions?broadcaster_id=${userId}&first=1`, { headers });
+        if (subResp.ok) {
+          const subData = await subResp.json();
+          if (subData.data && subData.data.length > 0) {
+            document.getElementById('latest-sub').textContent = subData.data[0].user_name;
+          } else {
+            document.getElementById('latest-sub').textContent = 'No active subs';
+          }
+        } else if (subResp.status === 401) {
+          document.getElementById('latest-sub').textContent = 'Re-auth for subs';
+        } else {
+          document.getElementById('latest-sub').textContent = 'Sub data unavailable';
+        }
+      } catch (subErr) {
+        console.warn('Subscriber lookup failed:', subErr);
+        document.getElementById('latest-sub').textContent = 'Sub data unavailable';
       }
     } catch(e) {
-      console.warn('Latest follower update failed:', e);
+      console.warn('Twitch data update failed:', e);
     }
   }
 
-  // ── Rocket League Ranks ──────────────────────────────────────
-  const RL_USERNAME = 'BeardedVetGaming';
-  // Playlist IDs on tracker.gg: 13=Standard(3v3), 11=Doubles(2v2), 27=Hoops
-  const RL_PLAYLISTS = { standard: 13, twos: 11, hoops: 27 };
-
-  // ── Cloudflare Worker Rank Proxy ─────────────────────────────────────
-  // IMPORTANT: Replace WORKER_URL below with your Cloudflare Worker URL
-  // after you deploy it (e.g. https://bvg-rl-proxy.c5m4ms2vcs.workers.dev/ranks)
-  const WORKER_URL = 'https://bvg-rl-proxy.c5m4ms2vcs.workers.dev/ranks';
-
-  const RANK_KEYS = { standard: 'bvg_rank_standard', twos: 'bvg_rank_twos', hoops: 'bvg_rank_hoops' };
-
-  function setRank(id, text) {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = text; el.classList.remove('loading'); }
+  function scheduleRLStatsReconnect() {
+    if (rlStatsReconnectTimer) return;
+    rlStatsReconnectTimer = setTimeout(() => {
+      rlStatsReconnectTimer = null;
+      connectRocketLeagueStats();
+    }, RL_STATS_RECONNECT_MS);
   }
 
-  function loadCachedRanks() {
-    setRank('rank-standard', localStorage.getItem(RANK_KEYS.standard) || 'Loading...');
-    setRank('rank-twos',     localStorage.getItem(RANK_KEYS.twos)     || 'Loading...');
-    setRank('rank-hoops',    localStorage.getItem(RANK_KEYS.hoops)    || 'Loading...');
-  }
-
-  async function fetchRLRanks() {
+  function connectRocketLeagueStats() {
     try {
-      const resp = await fetch(WORKER_URL);
-      if (!resp.ok) throw new Error('Worker returned ' + resp.status);
-      const data = await resp.json();
-      const ranks = data.ranks;
-      if (!ranks) throw new Error('No ranks in response');
+      if (rlStatsSocket && (rlStatsSocket.readyState === WebSocket.OPEN || rlStatsSocket.readyState === WebSocket.CONNECTING)) return;
 
-      // Update display + cache locally in case of future offline load
-      if (ranks.standard) { setRank('rank-standard', ranks.standard); localStorage.setItem(RANK_KEYS.standard, ranks.standard); }
-      if (ranks.twos)     { setRank('rank-twos',     ranks.twos);     localStorage.setItem(RANK_KEYS.twos,     ranks.twos); }
-      if (ranks.hoops)    { setRank('rank-hoops',    ranks.hoops);    localStorage.setItem(RANK_KEYS.hoops,    ranks.hoops); }
+      rlStatsSocket = new WebSocket(RL_STATS_WS_URL);
 
-      console.log('RL ranks updated:', ranks);
-    } catch(e) {
-      console.warn('Worker fetch failed, showing cached ranks:', e);
-      loadCachedRanks();
+      rlStatsSocket.addEventListener('open', () => {
+        console.log('Rocket League Stats API connected');
+      });
+
+      rlStatsSocket.addEventListener('message', (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          const eventName = message.Event;
+          const data = message.Data || {};
+
+          if (eventName === 'UpdateState' && data.Game) {
+            currentPlaylistId = data.Game.PlaylistId ?? currentPlaylistId;
+            document.documentElement.dataset.rlPlaylistId = currentPlaylistId ?? '';
+          }
+
+          // Rank/MMR is not part of the official Stats API payload. After a match,
+          // refresh whichever local rank feed is available so the pills update quickly
+          // if OmniStats/a helper has written new values.
+          if (eventName === 'MatchEnded' || eventName === 'PodiumStart' || eventName === 'MatchDestroyed') {
+            setTimeout(updateRanks, 15000);
+          }
+        } catch (parseErr) {
+          console.warn('Rocket League Stats API message parse failed:', parseErr);
+        }
+      });
+
+      rlStatsSocket.addEventListener('close', () => {
+        console.warn('Rocket League Stats API disconnected; retrying...');
+        scheduleRLStatsReconnect();
+      });
+
+      rlStatsSocket.addEventListener('error', () => {
+        try { rlStatsSocket.close(); } catch (_) {}
+      });
+    } catch (e) {
+      console.warn('Rocket League Stats API connection failed:', e);
+      scheduleRLStatsReconnect();
     }
   }
 
-  function saveRanks() {
-    const s = document.getElementById('edit-standard').value.trim();
-    const t = document.getElementById('edit-twos').value.trim();
-    const h = document.getElementById('edit-hoops').value.trim();
-    if (s) { localStorage.setItem(RANK_KEYS.standard, s); setRank('rank-standard', s); }
-    if (t) { localStorage.setItem(RANK_KEYS.twos, t);     setRank('rank-twos', t); }
-    if (h) { localStorage.setItem(RANK_KEYS.hoops, h);    setRank('rank-hoops', h); }
-    document.getElementById('rank-editor').style.display = 'none';
+  function setRankValue(id, value, isLoading = false) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value;
+    el.classList.toggle('loading', isLoading);
   }
 
-  function openRankEditor() {
-    document.getElementById('edit-standard').value = localStorage.getItem(RANK_KEYS.standard) || '';
-    document.getElementById('edit-twos').value     = localStorage.getItem(RANK_KEYS.twos)     || '';
-    document.getElementById('edit-hoops').value    = localStorage.getItem(RANK_KEYS.hoops)    || '';
-    document.getElementById('rank-editor').style.display = 'flex';
+  async function fetchRankSource(sourceUrl) {
+    const bust = `${sourceUrl}${sourceUrl.includes('?') ? '&' : '?'}_=${Date.now()}`;
+    const resp = await fetch(bust, { cache: 'no-store' });
+    if (!resp.ok) throw new Error(`Rank feed HTTP ${resp.status} for ${sourceUrl}`);
+    return resp.json();
+  }
+
+  async function updateRanks() {
+    try {
+      let data = null;
+      for (const sourceUrl of RANKS_FEED_SOURCES) {
+        try {
+          data = await fetchRankSource(sourceUrl);
+          if (data) break;
+        } catch (sourceErr) {
+          console.warn('Rank source failed:', sourceUrl, sourceErr);
+        }
+      }
+      if (!data) throw new Error('No rank source available');
+      setRankValue('rank-standard', data.standard || 'Unranked');
+      setRankValue('rank-doubles', data.doubles || 'Unranked');
+      setRankValue('rank-hoops', data.hoops || 'Unranked');
+    } catch (e) {
+      console.warn('Rank pill update failed:', e);
+      setRankValue('rank-standard', 'Set rank feed', true);
+      setRankValue('rank-doubles', 'Set rank feed', true);
+      setRankValue('rank-hoops', 'Set rank feed', true);
+    }
   }
 
   window.addEventListener('load', () => {
-    loadCachedRanks();        // Show saved ranks instantly
-    fetchRLRanks();           // Then fetch live from Worker
-    setInterval(fetchRLRanks, 300000); // Refresh every 5 minutes
+    init();
+    updateRanks();
+    connectRocketLeagueStats();
+    setInterval(updateRanks, RANK_REFRESH_MS);
   });
-
-
-  // ── Live Twitch Chat via IRC WebSocket ───────────────────────────────
-  const CHAT_COLORS = ['#4AC429','#9146FF','#FFB347','#E85566','#00BFFF','#FF69B4','#FFD700','#7FFF00'];
-  const userColorMap = {};
-  const MAX_MESSAGES = 20;
-
-  function getUserColor(username) {
-    if (!userColorMap[username]) {
-      const idx = Math.abs(username.split('').reduce((a,c)=>a+c.charCodeAt(0),0)) % CHAT_COLORS.length;
-      userColorMap[username] = CHAT_COLORS[idx];
-    }
-    return userColorMap[username];
-  }
-
-  function addChatMessage(username, message) {
-    const container = document.getElementById('chat-msgs');
-    const waiting = document.getElementById('chat-waiting');
-    if (waiting) waiting.remove();
-
-    const row = document.createElement('div');
-    row.className = 'chat-row';
-    row.innerHTML = `<span class="u" style="color:${getUserColor(username)}">${username}:</span><span class="m">${escapeHtml(message)}</span>`;
-    container.appendChild(row);
-
-    // Keep max messages
-    const rows = container.querySelectorAll('.chat-row');
-    if (rows.length > MAX_MESSAGES) rows[0].remove();
-
-    // Scroll to bottom
-    container.scrollTop = container.scrollHeight;
-  }
-
-  function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  function connectChat() {
-    const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
-
-    ws.onopen = () => {
-      ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
-      ws.send('PASS oauth:justinfan' + Math.floor(Math.random()*99999+10000));
-      ws.send('NICK justinfan' + Math.floor(Math.random()*99999+10000));
-      ws.send('JOIN #' + CHANNEL.toLowerCase());
-      console.log('Connected to Twitch chat');
-    };
-
-    ws.onmessage = (e) => {
-      const lines = e.data.split('\r\n');
-      lines.forEach(line => {
-        // Respond to PING
-        if (line.startsWith('PING')) { ws.send('PONG :tmi.twitch.tv'); return; }
-
-        // Parse PRIVMSG
-        const match = line.match(/^(?:@[^ ]+ )?:([^!]+)![^ ]+ PRIVMSG #\w+ :(.+)$/);
-        if (match) {
-          const username = match[1];
-          const message  = match[2];
-          addChatMessage(username, message);
-        }
-      });
-    };
-
-    ws.onerror = (e) => console.warn('Chat WS error', e);
-
-    ws.onclose = () => {
-      console.warn('Chat disconnected — reconnecting in 5s');
-      setTimeout(connectChat, 5000);
-    };
-  }
-
-  window.addEventListener('load', connectChat);
-
-  window.addEventListener('load', init);
 </script>
 </head><body>
 <!-- One-time auth prompt (only shows on very first load) -->
-<div id="auth-prompt" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,0.97);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+<div id="auth-prompt" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,0.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
   <div style="font-family:'Permanent Marker',cursive;font-size:36px;color:#4AC429;text-shadow:3px 3px 0 #000;">Connect to Twitch</div>
-  <div style="font-family:Arial,sans-serif;font-size:15px;color:rgba(255,255,255,0.6);text-align:center;max-width:560px;line-height:1.6;">
-    1. Open <b style="color:#4AC429;">auth.html</b> in your browser (it came in the same zip as this file)<br><br>
-    2. Click <b style="color:#4AC429;">Authorize with Twitch</b> — it redirects back and shows your token<br><br>
-    3. Copy the token, paste it below, and click Save
-  </div>
-  <input id="token-input" type="text" placeholder="Paste your token here..."
-    style="font-family:Arial,sans-serif;font-size:15px;padding:12px 18px;width:480px;background:#111;border:2px solid #4AC429;color:#fff;outline:none;" />
-  <button onclick="saveAndInit()" style="font-family:'Permanent Marker',cursive;font-size:22px;background:#4AC429;color:#000;border:none;padding:14px 40px;cursor:pointer;letter-spacing:2px;">Save Token</button>
+  <div style="font-family:Arial,sans-serif;font-size:16px;color:rgba(255,255,255,0.6);text-align:center;max-width:500px;">Authorization needed to pull live viewers, follower count, recent follower, most recent sub, and current Twitch game/category.</div>
+  <button onclick="redirectToAuth()" style="font-family:'Permanent Marker',cursive;font-size:22px;background:#4AC429;color:#000;border:none;padding:14px 40px;cursor:pointer;letter-spacing:2px;">Authorize with Twitch</button>
 </div>
 
 <div class="overlay">
@@ -381,38 +409,27 @@
         <div class="l3">Live Now</div>
       </div>
     </div>
-
+    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
     <div class="stat"><b id="viewer-count">--</b>&nbsp;Viewers</div>
     <div class="stat"><b id="follower-count">--</b>&nbsp;Followers</div>
-    <div class="stat">🎮&nbsp;<span id="game-name">--</span></div>
-    <div class="bar-right">💬 <span>discord.gg/czRXSddNG6</span></div>
-  </div>
-
-
-
-  <!-- Rank editor popup -->
-  <div id="rank-editor" style="display:none;position:fixed;inset:0;background:rgba(10,10,10,0.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
-    <div style="font-family:'Permanent Marker',cursive;font-size:28px;color:#4AC429;text-shadow:2px 2px 0 #000;">Update RL Ranks</div>
-    <div style="display:flex;flex-direction:column;gap:10px;width:340px;">
-      <label style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);">Standard (3v3)</label>
-      <input id="edit-standard" type="text" placeholder="e.g. Diamond III D1" style="font-size:15px;padding:10px 14px;background:#111;border:2px solid #4AC429;color:#fff;outline:none;font-family:Arial,sans-serif;">
-      <label style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);">2v2 (Doubles)</label>
-      <input id="edit-twos" type="text" placeholder="e.g. Diamond II D2" style="font-size:15px;padding:10px 14px;background:#111;border:2px solid #4AC429;color:#fff;outline:none;font-family:Arial,sans-serif;">
-      <label style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);">Hoops</label>
-      <input id="edit-hoops" type="text" placeholder="e.g. Platinum III D2" style="font-size:15px;padding:10px 14px;background:#111;border:2px solid #4AC429;color:#fff;outline:none;font-family:Arial,sans-serif;">
-    </div>
-    <div style="display:flex;gap:12px;">
-      <button onclick="saveRanks()" style="font-family:'Permanent Marker',cursive;font-size:18px;background:#4AC429;color:#000;border:none;padding:12px 32px;cursor:pointer;">Save Ranks</button>
-      <button onclick="document.getElementById('rank-editor').style.display='none'" style="font-family:'Permanent Marker',cursive;font-size:18px;background:#333;color:#fff;border:none;padding:12px 32px;cursor:pointer;">Cancel</button>
-    </div>
-    <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.3);">Ranks are saved in OBS — only update when your rank changes</div>
+    <div class="stat">🎮&nbsp;<b id="game-name">Loading...</b></div>
+    <div class="bar-right">Channel Points: <span>45,230</span></div>
   </div>
 
   <!-- Rank pills -->
-  <div class="ranks" ondblclick="openRankEditor()" title="Double-click to update ranks">
-    <div class="rpill standard"><span class="label">Standard</span><span class="rank-val loading" id="rank-standard">Loading...</span></div>
-    <div class="rpill twos"><span class="label">2v2</span><span class="rank-val loading" id="rank-twos">Loading...</span></div>
-    <div class="rpill hoops"><span class="label">Hoops</span><span class="rank-val loading" id="rank-hoops">Loading...</span></div>
+  <div class="rank-pills">
+    <div class="rank-pill standard">
+      <div class="label">Standard</div>
+      <div class="value loading" id="rank-standard">Loading...</div>
+    </div>
+    <div class="rank-pill doubles">
+      <div class="label">Doubles</div>
+      <div class="value loading" id="rank-doubles">Loading...</div>
+    </div>
+    <div class="rank-pill hoops">
+      <div class="label">Hoops</div>
+      <div class="value loading" id="rank-hoops">Loading...</div>
+    </div>
   </div>
 
   <!-- Cam frame -->
@@ -428,10 +445,11 @@
 
   <!-- Chat box -->
   <div class="chat-box">
-    <div class="chat-hdr">★ Live Chat <span class="chat-dot"></span></div>
-    <div class="chat-msgs" id="chat-msgs">
-      <div class="chat-waiting" id="chat-waiting">Connecting to chat...</div>
-    </div>
+    <div class="chat-hdr">★ Live Chat</div>
+    <div class="chat-row"><span class="u">BVG_Mod:</span><span class="m">Welcome everyone! o7</span></div>
+    <div class="chat-row"><span class="u">GreenBeret99:</span><span class="m">Let's get these goals! PogChamp</span></div>
+    <div class="chat-row"><span class="u">TacticalTina:</span><span class="m">o7 Veteran respect!</span></div>
+    <div class="chat-row"><span class="u">CowboysFan88:</span><span class="m">LFG!! Let's gooo</span></div>
   </div>
 
   <!-- Bottom Bar -->
@@ -439,11 +457,18 @@
     <div class="recent">
       <div class="rev-icon">⭐</div>
       <div class="rev-text">
-        <div class="rl">Latest Follower</div>
-        <div class="rn" id="latest-sub-name">--</div>
+        <div class="rl">Recent Follower</div>
+        <div class="rn" id="latest-follower">Loading...</div>
       </div>
     </div>
-    <div class="ticker"><b>★</b> Thanks for watching Bearded Veteran Gaming! &nbsp;·&nbsp; Follow for alerts &nbsp;·&nbsp; <b>★</b></div>
+    <div class="recent">
+      <div class="rev-icon">★</div>
+      <div class="rev-text">
+        <div class="rl">Most Recent Sub</div>
+        <div class="rn" id="latest-sub">Loading...</div>
+      </div>
+    </div>
+    <div class="ticker"><b>★</b> Thanks for watching Bearded Veteran Gaming! &nbsp;·&nbsp; Follow for alerts &nbsp;·&nbsp; <b>Veteran owned &amp; operated</b> &nbsp;·&nbsp; <b>★</b></div>
     <div class="socials-row">
       <div class="sh"><span>TWITCH</span> /BeardedVeteranGaming</div>
       <div class="sh"><span>YOUTUBE</span> @BeardedVeteranGaming</div>

@@ -173,7 +173,7 @@
   // Cloudflare keeps the private API key out of this public overlay and returns
   // only the three display-ready Rocket League ranks to OBS.
   const RL_RANKS_URL = 'https://bvg-rocket-league-ranks.c5m4ms2vcs.workers.dev/';
-  const RL_RANK_REFRESH_MS = 5 * 60 * 1000;
+  const RL_RANK_REFRESH_MS = 60 * 60 * 1000; // Once per hour.
   const RL_RANK_CACHE_KEY = 'bvg_rl_ranks_v1';
 
   let rlStatsSocket = null;
@@ -487,9 +487,6 @@
               localStorage.setItem(RL_RANK_CACHE_KEY, JSON.stringify(data));
             }
           }
-
-          // Tracker normally catches up shortly after a ranked game ends.
-          if (eventName === 'MatchEnded') setTimeout(refreshRanks, 90000);
 
         } catch (parseErr) {
           console.warn('Rocket League Stats API message parse failed:', parseErr);
